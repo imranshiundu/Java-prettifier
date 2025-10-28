@@ -1,0 +1,3 @@
+Flight from #LAX to ##EGLL
+Departure: D(2022-05-09T08:07Z)
+Arrival: T12(2022-05-09T16:30+01:00)
