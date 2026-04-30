@@ -1,0 +1,16 @@
+Passenger itinerary
+
+Departure airport: #NBO
+Departure city: *#NBO
+Departure date: D(2026-05-01T09:30+03:00)
+Departure time: T24(2026-05-01T09:30+03:00)
+
+Connection airport: #DXB
+Connection city: *#DXB
+Connection time: T12(2026-05-01T15:45+04:00)
+
+Arrival airport: ##EGLL
+Arrival city: *##EGLL
+Arrival time: T12(2026-05-01T20:10+01:00)
+
+Unknown demo token left unchanged: #ZZZ
