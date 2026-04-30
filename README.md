@@ -4,11 +4,20 @@ A dependency-free Java command-line tool that converts raw airline itinerary tex
 
 It replaces airport-code tokens with real airport or city names, formats ISO date/time values, cleans messy line breaks, validates lookup data, and writes a polished output file.
 
+## New in this upgraded version
+
+This project now has two layers:
+
+- `Prettifier.java` — the stable assignment/review version. Its default behaviour remains simple and unchanged.
+- `ItineraryStudio.java` — the creative bonus layer with HTML, Markdown, JSON, boarding-pass export, batch processing, lookup cards, and reports.
+
+That means reviewers can still run the original program normally, while the project also demonstrates stronger product thinking and more advanced CLI design.
+
 ## Why this project matters
 
 Raw itinerary exports are often easy for machines to read but uncomfortable for people. This project turns compact travel text into a passenger-friendly format while staying simple enough to review, explain, and run on any machine with Java installed.
 
-## Features
+## Core features
 
 - Replace IATA airport codes such as `#NBO`
 - Replace ICAO airport codes such as `##HKJK`
@@ -22,6 +31,22 @@ Raw itinerary exports are often easy for machines to read but uncomfortable for 
 - Optional strict mode for review and automated validation
 - Optional terminal output, colored preview, stats, and unknown-token report
 - Example files and smoke-test script included
+
+## Advanced studio features
+
+`ItineraryStudio.java` adds:
+
+- Batch processing for whole folders of `.txt` itineraries
+- Printable HTML export
+- Boarding-pass style HTML export
+- Markdown export
+- JSON export for downstream systems
+- Airport lookup cards for IATA or ICAO codes
+- Processing reports with replacement counts and unresolved tokens
+- GitHub Actions CI workflow
+- Dedicated studio demo script
+
+More details are available in [`STUDIO_FEATURES.md`](STUDIO_FEATURES.md).
 
 ## What you will learn
 
@@ -37,6 +62,9 @@ This project demonstrates:
 - Defensive validation
 - Date and time formatting
 - Small CLI design
+- Batch file workflows
+- Multi-format exports
+- CI smoke testing
 
 ## Supported itinerary tokens
 
@@ -88,7 +116,13 @@ cd java-prettifier
 javac Prettifier.java
 ```
 
-## Usage
+For the advanced studio layer:
+
+```bash
+javac -d build Prettifier.java ItineraryStudio.java
+```
+
+## Core usage
 
 Run in Java source mode:
 
@@ -107,6 +141,44 @@ Show help:
 
 ```bash
 java Prettifier.java --help
+```
+
+## Advanced studio usage
+
+Create printable HTML:
+
+```bash
+java -cp build ItineraryStudio examples/input.txt reports/studio/itinerary.html examples/airport-lookup.csv --format html --title "Passenger Itinerary"
+```
+
+Create boarding-pass style HTML:
+
+```bash
+java -cp build ItineraryStudio examples/input.txt reports/studio/boarding-pass.html examples/airport-lookup.csv --format boarding-pass --title "Boarding Pass"
+```
+
+Create Markdown:
+
+```bash
+java -cp build ItineraryStudio examples/input.txt reports/studio/itinerary.md examples/airport-lookup.csv --format markdown
+```
+
+Create JSON:
+
+```bash
+java -cp build ItineraryStudio examples/input.txt reports/studio/itinerary.json examples/airport-lookup.csv --format json
+```
+
+Lookup an airport:
+
+```bash
+java -cp build ItineraryStudio --lookup NBO examples/airport-lookup.csv
+```
+
+Run the studio demo:
+
+```bash
+bash scripts/studio-demo.sh
 ```
 
 ## Quick demo
@@ -207,18 +279,28 @@ java Prettifier.java input.txt output.txt airport-lookup.csv --validate-only --s
 
 ```txt
 java-prettifier/
+├── .github/
+│   └── workflows/
+│       └── java-ci.yml
 ├── Prettifier.java
+├── ItineraryStudio.java
 ├── README.md
 ├── REVIEW_GUIDE.md
+├── STUDIO_FEATURES.md
 ├── examples/
 │   ├── airport-lookup.csv
 │   └── input.txt
 └── scripts/
     ├── demo.sh
+    ├── studio-demo.sh
     └── test.sh
 ```
 
 ## Design choices
+
+### Stable core plus creative layer
+
+`Prettifier.java` remains the clean assignment solution. `ItineraryStudio.java` is separated so bonus features do not make the default review path harder to understand.
 
 ### Single-file Java core
 
@@ -255,6 +337,10 @@ During review, demonstrate:
 9. `--unknown-report`
 10. `--strict` with the provided `#ZZZ` sample token
 11. `bash scripts/test.sh`
+12. `bash scripts/studio-demo.sh`
+13. Open `reports/studio/itinerary.html`
+14. Open `reports/studio/boarding-pass.html`
+15. Run `java -cp build ItineraryStudio --lookup NBO examples/airport-lookup.csv`
 
 A more detailed review flow is available in [`REVIEW_GUIDE.md`](REVIEW_GUIDE.md).
 
@@ -280,13 +366,12 @@ The input contains a code that is not available in the CSV lookup file.
 
 Possible future additions:
 
-- Batch processing for folders
-- Markdown output mode
-- JSON processing report
-- HTML itinerary export
-- Timezone name display
 - JUnit tests
 - Maven or Gradle build profile
+- Timezone name display
+- Calendar invite export
+- QR code generation for boarding-pass pages
+- GUI wrapper
 
 ## License
 
