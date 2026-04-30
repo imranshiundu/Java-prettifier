@@ -1,42 +1,41 @@
 # java-prettifier
 
-A professional Java command-line tool for converting raw airline itinerary text into clean, readable travel documents.
+A dependency-free Java command-line tool that converts raw airline itinerary text into clean, readable travel documents.
 
-The program reads a plain text itinerary, replaces airport code tokens with real airport or city names using an airport lookup CSV, formats ISO dates and times, normalizes messy line breaks, and writes a polished output file.
+It replaces airport-code tokens with real airport or city names, formats ISO date/time values, cleans messy line breaks, validates lookup data, and writes a polished output file.
 
-## Project overview
+## Why this project matters
 
-Travel systems often export itinerary text in compact machine-style formats. For example:
+Raw itinerary exports are often easy for machines to read but uncomfortable for people. This project turns compact travel text into a passenger-friendly format while staying simple enough to review, explain, and run on any machine with Java installed.
 
-```txt
-Flight departs from #NBO on D(2026-05-01T09:30+03:00)
-Boarding time: T24(2026-05-01T07:45+03:00)
-Arrival city: *#LHR
-Arrival airport: ##EGLL
-```
+## Features
 
-`java-prettifier` turns that into something more readable:
-
-```txt
-Flight departs from Jomo Kenyatta International Airport on 01 May 2026
-Boarding time: 07:45 (+03:00)
-Arrival city: London
-Arrival airport: London Heathrow Airport
-```
+- Replace IATA airport codes such as `#NBO`
+- Replace ICAO airport codes such as `##HKJK`
+- Replace airport codes with city names using `*#NBO` and `*##HKJK`
+- Format ISO dates using `D(...)`
+- Format 12-hour and 24-hour times using `T12(...)` and `T24(...)`
+- Normalize Windows, Unix, old Mac, vertical-tab, and form-feed line breaks
+- Collapse excessive blank lines
+- Validate CSV structure before processing
+- Preserve unknown tokens by default instead of deleting information
+- Optional strict mode for review and automated validation
+- Optional terminal output, colored preview, stats, and unknown-token report
+- Example files and smoke-test script included
 
 ## What you will learn
 
-This project demonstrates core Java fundamentals:
+This project demonstrates:
 
 - String manipulation
 - Regular expressions
 - Command-line arguments
 - Navigating the file system
-- Reading files
-- Writing files
+- Reading from files
+- Writing to files
 - CSV parsing
+- Defensive validation
 - Date and time formatting
-- Defensive input validation
 - Small CLI design
 
 ## Supported itinerary tokens
@@ -67,48 +66,41 @@ Jomo Kenyatta International Airport,KE,Nairobi,HKJK,NBO,"36.9278,-1.3192"
 London Heathrow Airport,GB,London,EGLL,LHR,"-0.461941,51.4706"
 ```
 
-The parser supports quoted CSV cells, including quoted coordinates containing commas.
+The parser supports quoted CSV cells, including coordinates that contain commas.
 
-## Setup and installation
-
-### Requirements
+## Requirements
 
 - Java 17 or newer recommended
-- No external dependencies
-- No Maven or Gradle required
+- Bash for the helper scripts
+- No Maven, Gradle, or external dependencies required
 
-Check your Java version:
+Check Java:
 
 ```bash
 java --version
 ```
 
-Clone the repository:
+## Installation
 
 ```bash
 git clone https://github.com/imranshiundu/java-prettifier.git
 cd java-prettifier
-```
-
-Compile:
-
-```bash
 javac Prettifier.java
 ```
 
-## Usage guide
+## Usage
 
-Run directly with Java source mode:
+Run in Java source mode:
 
 ```bash
 java Prettifier.java ./input.txt ./output.txt ./airport-lookup.csv
 ```
 
-Or compile first and run the class:
+Or compile first:
 
 ```bash
-javac Prettifier.java
-java Prettifier ./input.txt ./output.txt ./airport-lookup.csv
+javac -d build Prettifier.java
+java -cp build Prettifier ./input.txt ./output.txt ./airport-lookup.csv
 ```
 
 Show help:
@@ -117,57 +109,70 @@ Show help:
 java Prettifier.java --help
 ```
 
+## Quick demo
+
+The repository includes example input and airport data.
+
+```bash
+bash scripts/demo.sh
+```
+
+This creates:
+
+```txt
+reports/output.txt
+reports/unknown-report.md
+```
+
+## Smoke test
+
+```bash
+bash scripts/test.sh
+```
+
+Expected result:
+
+```txt
+All smoke tests passed.
+```
+
 ## Example
 
-Create `input.txt`:
+Input:
 
 ```txt
 Passenger itinerary
-Departure: #NBO
+Departure airport: #NBO
 Departure city: *#NBO
 Departure date: D(2026-05-01T09:30+03:00)
 Departure time: T24(2026-05-01T09:30+03:00)
-Arrival: ##EGLL
+Arrival airport: ##EGLL
 Arrival city: *##EGLL
-Arrival time: T12(2026-05-01T16:10+01:00)
+Arrival time: T12(2026-05-01T20:10+01:00)
 ```
 
-Create `airport-lookup.csv`:
-
-```csv
-name,iso_country,municipality,icao_code,iata_code,coordinates
-Jomo Kenyatta International Airport,KE,Nairobi,HKJK,NBO,"36.9278,-1.3192"
-London Heathrow Airport,GB,London,EGLL,LHR,"-0.461941,51.4706"
-```
-
-Run:
-
-```bash
-java Prettifier.java input.txt output.txt airport-lookup.csv --stdout --stats
-```
-
-Expected output file:
+Output:
 
 ```txt
 Passenger itinerary
-Departure: Jomo Kenyatta International Airport
+Departure airport: Jomo Kenyatta International Airport
 Departure city: Nairobi
 Departure date: 01 May 2026
 Departure time: 09:30 (+03:00)
-Arrival: London Heathrow Airport
+Arrival airport: London Heathrow Airport
 Arrival city: London
-Arrival time: 04:10PM (+01:00)
+Arrival time: 08:10PM (+01:00)
 ```
 
-## Bonus functionality implemented
+## Bonus functionality
 
-The default functional behavior is preserved: the program still accepts:
+The default behavior remains the same:
 
 ```bash
 java Prettifier.java ./input.txt ./output.txt ./airport-lookup.csv
 ```
 
-Additional bonus flags are optional:
+Optional flags add extra functionality without changing the default behavior.
 
 | Flag | Purpose |
 |---|---|
@@ -176,14 +181,14 @@ Additional bonus flags are optional:
 | `--quiet` | Suppress success output and only show errors |
 | `--stats` | Print replacement statistics |
 | `--strict` | Fail if unknown airport codes are found |
-| `--validate-only` | Validate files and tokens without writing output |
+| `--validate-only` | Validate input and CSV without writing output |
 | `--dry-run` | Alias for `--validate-only` |
 | `--unknown-report <file>` | Save unknown airport/date-time tokens to a Markdown report |
 
-Example with bonus flags:
+Example:
 
 ```bash
-java Prettifier.java input.txt output.txt airport-lookup.csv --stdout --stats --unknown-report reports/unknown.md
+java Prettifier.java input.txt output.txt airport-lookup.csv --stdout --stats --unknown-report reports/unknown-report.md
 ```
 
 Strict validation:
@@ -198,42 +203,60 @@ Validation only:
 java Prettifier.java input.txt output.txt airport-lookup.csv --validate-only --stats
 ```
 
+## Project structure
+
+```txt
+java-prettifier/
+├── Prettifier.java
+├── README.md
+├── REVIEW_GUIDE.md
+├── examples/
+│   ├── airport-lookup.csv
+│   └── input.txt
+└── scripts/
+    ├── demo.sh
+    └── test.sh
+```
+
 ## Design choices
 
-### Single-file Java
+### Single-file Java core
 
-The project stays easy to review and run. A reviewer can open one file, compile it, and understand the full flow without installing dependencies.
+The main implementation stays in one Java file so reviewers can understand the full program without jumping through a framework.
 
-### No external libraries
+### Dependency-free
 
-CSV parsing, token parsing, and formatting are implemented using Java standard library features only.
+Everything uses the Java standard library. That keeps setup lightweight and makes the project easier to run in class, review, or interview settings.
 
-### Defensive file handling
+### Safer unknown-token handling
 
-The program checks whether the input and airport lookup files exist and whether they are regular files before processing.
+Unknown airport or date/time tokens are preserved by default. This prevents the tool from silently destroying useful itinerary information.
 
-### CSV parser upgrade
+### Strict mode for quality checks
 
-The original simple `split(",")` approach breaks when coordinates contain commas. The upgraded version includes a small CSV parser that handles quoted cells correctly.
+Strict mode gives reviewers and automated scripts a way to fail fast when unresolved tokens are present.
 
-### Unknown tokens are preserved
+### Real CSV handling
 
-If an airport code or date/time token cannot be resolved, it is left unchanged instead of being deleted. This makes the program safer because it does not silently destroy information.
+The CSV parser handles quoted fields, including coordinates that contain commas. This avoids the common beginner mistake of using `split(",")` for CSV data.
 
-## Review demonstration checklist
+## Review checklist
 
-During review, be ready to demonstrate:
+During review, demonstrate:
 
-1. Running the help command
-2. Running the default three-argument command
-3. Showing airport-name replacement with `#XXX` and `##XXXX`
-4. Showing city-name replacement with `*#XXX` and `*##XXXX`
-5. Showing date formatting with `D(...)`
-6. Showing 12-hour and 24-hour time formatting
-7. Showing messy blank-line cleanup
-8. Showing `--stats`
-9. Showing `--strict` with an unknown airport code
-10. Explaining why quoted CSV parsing was needed
+1. `java Prettifier.java --help`
+2. Default three-argument usage
+3. `#XXX` IATA airport-name replacement
+4. `##XXXX` ICAO airport-name replacement
+5. `*#XXX` and `*##XXXX` city replacement
+6. `D(...)` date formatting
+7. `T12(...)` and `T24(...)` time formatting
+8. `--stats`
+9. `--unknown-report`
+10. `--strict` with the provided `#ZZZ` sample token
+11. `bash scripts/test.sh`
+
+A more detailed review flow is available in [`REVIEW_GUIDE.md`](REVIEW_GUIDE.md).
 
 ## Common errors
 
@@ -253,25 +276,18 @@ The CSV is missing required columns, has unclosed quotes, or has empty required 
 
 The input contains a code that is not available in the CSV lookup file.
 
-## Project structure
-
-```txt
-java-prettifier/
-├── Prettifier.java
-└── README.md
-```
-
 ## Future improvements
 
 Possible future additions:
 
-- Unit tests with JUnit
-- Maven or Gradle build file
-- JSON output mode
 - Batch processing for folders
+- Markdown output mode
+- JSON processing report
+- HTML itinerary export
 - Timezone name display
-- Export summary report as HTML
+- JUnit tests
+- Maven or Gradle build profile
 
 ## License
 
-This project is currently provided for learning and review purposes. Add a license file before publishing it as an open-source package.
+This project is currently provided for learning and review purposes. Add a license file before publishing it as a reusable open-source package.
