@@ -1,0 +1,22 @@
+# Java build output
+*.class
+*.jar
+*.war
+*.ear
+
+# Local demo/test output
+build/
+out/
+reports/
+output.txt
+unknown-report.md
+processing-report.md
+
+# IDE/editor files
+.idea/
+.vscode/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
